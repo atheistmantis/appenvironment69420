@@ -1,4 +1,4 @@
-name: buildanddeploy 2 github
+name: build and deploy
 
 on:
   push:
@@ -11,6 +11,10 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,18 +25,20 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm ci
+        
+        run: npm install
+      
 
       - name: Build (Vite)
         run: npm run build
+      
 
       - name: Add SPA fallback (optional)
-        # ensures client-side routing works on GitHub Pages
         run: |
           if [ -d dist ] && [ -f dist/index.html ]; then
             cp dist/index.html dist/404.html || true
           fi
-
+       
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:
