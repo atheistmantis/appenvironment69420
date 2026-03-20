@@ -5,10 +5,11 @@
  *
  * @param {import('./recipes.js').Recipe} recipe
  * @param {(id: string) => void} onDelete  – called when admin deletes this card
- * @param {boolean} adminMode              – show delete button when true
+ * @param {boolean} adminMode              – show edit/delete buttons when true
+ * @param {(recipe: import('./recipes.js').Recipe) => void} [onEdit] – called when admin edits this card
  * @returns {HTMLElement}
  */
-export function RecipeCard(recipe, onDelete, adminMode = false) {
+export function RecipeCard(recipe, onDelete, adminMode = false, onEdit) {
   const card = document.createElement('article');
   card.className = 'recipe-card';
   card.setAttribute('tabindex', '0');
@@ -36,8 +37,19 @@ export function RecipeCard(recipe, onDelete, adminMode = false) {
 
   card.appendChild(overlay);
 
-  // Delete button (admin mode only)
+  // Edit and Delete buttons (admin mode only)
   if (adminMode) {
+    const editBtn = document.createElement('button');
+    editBtn.className = 'recipe-card__edit';
+    editBtn.type = 'button';
+    editBtn.setAttribute('aria-label', `Edit ${recipe.name}`);
+    editBtn.textContent = '✎';
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (onEdit) onEdit(recipe);
+    });
+    card.appendChild(editBtn);
+
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'recipe-card__delete';
     deleteBtn.type = 'button';

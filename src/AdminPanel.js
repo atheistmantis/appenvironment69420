@@ -1,12 +1,14 @@
 /**
  * AdminPanel – collapsible form that lets admins add new recipes.
- * Recipes can also be deleted directly from the card (in admin mode).
+ * Recipes can also be deleted/edited directly from the card (in admin mode).
  *
- * @param {(data: {name:string, image:string, description:string}) => void} onAdd
- * @param {() => void} onReset
+ * @param {(data: {name:string, image:string, description:string}) => Promise<void>} onAdd
+ * @param {() => Promise<void>} onReset
+ * @param {() => Promise<void>} onLogout – called when the admin clicks "Log out"
+ * @param {boolean} isAuthenticated – true when backed by Supabase auth
  * @returns {HTMLElement}
  */
-export function AdminPanel(onAdd, onReset) {
+export function AdminPanel(onAdd, onReset, onLogout, isAuthenticated) {
   const panel = document.createElement('section');
   panel.className = 'admin-panel';
   panel.setAttribute('aria-label', 'Admin panel – add recipes');
@@ -77,6 +79,7 @@ export function AdminPanel(onAdd, onReset) {
       <button type="button" id="reset-btn" class="big-btn admin-panel__reset">
         Reset to Default Recipes
       </button>
+      ${isAuthenticated ? '<button type="button" id="logout-btn" class="big-btn admin-panel__logout">Log Out</button>' : ''}
     </div>
   `;
 
@@ -95,7 +98,7 @@ export function AdminPanel(onAdd, onReset) {
   toggleBtn.addEventListener('click', () => setOpen(!open));
 
   // ── Form submission ────────────────────────────────────────────
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));
 
@@ -108,20 +111,51 @@ export function AdminPanel(onAdd, onReset) {
       return;
     }
 
-    onAdd({ name: data.name, image: data.image, description: data.description || '' });
-    form.reset();
-    setOpen(false);
-    announceToScreenReader('Recipe added successfully!');
+    const submitBtn = form.querySelector('.admin-panel__submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Adding…';
+    try {
+      await onAdd({ name: data.name, image: data.image, description: data.description || '' });
+      form.reset();
+      setOpen(false);
+      announceToScreenReader('Recipe added successfully!');
+    } catch (err) {
+      showError(form.querySelector('#recipe-name'), err.message || 'Failed to add recipe.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Add Recipe';
+    }
   });
 
   // ── Reset button ───────────────────────────────────────────────
-  form.querySelector('#reset-btn').addEventListener('click', () => {
+  form.querySelector('#reset-btn').addEventListener('click', async () => {
     if (confirm('This will remove all custom recipes and restore the defaults. Continue?')) {
-      onReset();
-      setOpen(false);
-      announceToScreenReader('Recipes reset to defaults.');
+      const resetBtn = form.querySelector('#reset-btn');
+      resetBtn.disabled = true;
+      resetBtn.textContent = 'Resetting…';
+      try {
+        await onReset();
+        setOpen(false);
+        announceToScreenReader('Recipes reset to defaults.');
+      } catch (err) {
+        alert(err.message || 'Failed to reset recipes.');
+      } finally {
+        resetBtn.disabled = false;
+        resetBtn.textContent = 'Reset to Default Recipes';
+      }
     }
   });
+
+  // ── Logout button ──────────────────────────────────────────────
+  if (isAuthenticated) {
+    form.querySelector('#logout-btn').addEventListener('click', async () => {
+      try {
+        await onLogout();
+      } catch (err) {
+        alert(err.message || 'Logout failed.');
+      }
+    });
+  }
 
   return panel;
 }
