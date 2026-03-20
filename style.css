@@ -358,6 +358,255 @@ html, body {
   background: var(--accent-dark);
 }
 
+.admin-panel__logout {
+  flex: 1;
+  min-width: 160px;
+  background: var(--danger);
+}
+
+.admin-panel__logout:hover,
+.admin-panel__logout:focus-visible {
+  background: #b71c1c;
+}
+
+/* ─────────────────────────────────────────────
+   Recipe card edit button
+───────────────────────────────────────────── */
+.recipe-card__edit {
+  position: absolute;
+  top: 12px;
+  right: 60px;
+  background: rgba(11, 92, 255, .88);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+  line-height: 1;
+}
+
+.recipe-card__edit:hover,
+.recipe-card__edit:focus-visible {
+  background: var(--accent-dark);
+}
+
+/* ─────────────────────────────────────────────
+   Loading state
+───────────────────────────────────────────── */
+.recipe-grid__loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 1.3rem;
+  color: var(--text-muted);
+  padding: 60px 20px;
+}
+
+/* ─────────────────────────────────────────────
+   Login modal
+───────────────────────────────────────────── */
+.login-modal {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0;
+  max-width: 420px;
+  width: calc(100% - 32px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, .28);
+}
+
+.login-modal::backdrop {
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(2px);
+}
+
+.login-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px 28px 28px;
+}
+
+.login-modal__title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text);
+}
+
+.login-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-modal__label {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.login-modal__input {
+  font-size: 1.05rem;
+  padding: 12px 14px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .15s;
+  width: 100%;
+  font-family: inherit;
+}
+
+.login-modal__input:focus {
+  border-color: var(--accent);
+}
+
+.login-modal__error {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.95rem;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.login-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-modal__submit {
+  width: 100%;
+}
+
+.login-modal__cancel {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  text-align: center;
+  border-radius: 8px;
+  transition: color .15s;
+}
+
+.login-modal__cancel:hover,
+.login-modal__cancel:focus-visible {
+  color: var(--text);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────────
+   Edit recipe modal
+───────────────────────────────────────────── */
+.edit-modal {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0;
+  max-width: 480px;
+  width: calc(100% - 32px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, .28);
+}
+
+.edit-modal::backdrop {
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(2px);
+}
+
+.edit-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px 28px 28px;
+}
+
+.edit-modal__title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text);
+}
+
+.edit-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-modal__label {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.edit-modal__input {
+  font-size: 1.05rem;
+  padding: 12px 14px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .15s;
+  width: 100%;
+  font-family: inherit;
+}
+
+.edit-modal__input:focus {
+  border-color: var(--accent);
+}
+
+.edit-modal__textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.edit-modal__hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.edit-modal__error {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.95rem;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.edit-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-modal__save {
+  width: 100%;
+}
+
+.edit-modal__cancel {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  text-align: center;
+  border-radius: 8px;
+  transition: color .15s;
+}
+
+.edit-modal__cancel:hover,
+.edit-modal__cancel:focus-visible {
+  color: var(--text);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ─────────────────────────────────────────────
    Responsive tweaks
 ───────────────────────────────────────────── */

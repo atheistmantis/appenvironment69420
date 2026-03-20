@@ -1,10 +1,15 @@
-import { loadRecipes, addRecipe, deleteRecipe, resetToDefaults } from './recipes.js';
+import { loadRecipes, addRecipe, updateRecipe, deleteRecipe, resetToDefaults } from './recipes.js';
 import { RecipeCard } from './RecipeCard.js';
 import { AdminPanel } from './AdminPanel.js';
+import { LoginModal } from './LoginModal.js';
+import { EditRecipeModal } from './EditRecipeModal.js';
+import { getSession, signOut, onAuthStateChange } from './auth.js';
+import { isSupabaseConfigured } from './supabase.js';
 
 /** @type {import('./recipes.js').Recipe[]} */
-let recipes = loadRecipes();
+let recipes = [];
 let adminMode = false;
+let isAuthenticated = false;
 
 const root = document.getElementById('app');
 
@@ -34,10 +39,31 @@ root.innerHTML = `
   <div id="admin-area"></div>
 `;
 
+// ── Edit recipe modal ────────────────────────────────────────────────────────
+
+const editModal = EditRecipeModal(async (id, data) => {
+  recipes = await updateRecipe(id, data);
+  renderGrid();
+});
+
+// ── Login modal (only when Supabase is configured) ───────────────────────────
+
+let loginModal = null;
+if (isSupabaseConfigured) {
+  loginModal = LoginModal(() => {
+    // Auth state change listener handles the rest
+  });
+}
+
 // ── Admin mode toggle ────────────────────────────────────────────────────────
 
 const adminToggle = document.getElementById('admin-toggle');
 adminToggle.addEventListener('click', () => {
+  if (isSupabaseConfigured && !isAuthenticated) {
+    // Open login modal instead of toggling admin mode
+    loginModal.open();
+    return;
+  }
   adminMode = !adminMode;
   adminToggle.setAttribute('aria-pressed', String(adminMode));
   adminToggle.classList.toggle('app-header__admin-btn--active', adminMode);
@@ -54,14 +80,19 @@ function renderAdmin() {
   if (!adminMode) return;
 
   const panel = AdminPanel(
-    (data) => {
-      recipes = addRecipe(recipes, data);
+    async (data) => {
+      recipes = await addRecipe(data);
       renderGrid();
     },
-    () => {
-      recipes = resetToDefaults();
+    async () => {
+      recipes = await resetToDefaults();
       renderGrid();
-    }
+    },
+    async () => {
+      await signOut();
+      // auth state change listener handles UI reset
+    },
+    isAuthenticated,
   );
   adminArea.appendChild(panel);
 }
@@ -82,20 +113,67 @@ function renderGrid() {
   }
 
   recipes.forEach((recipe) => {
-    const card = RecipeCard(recipe, handleDelete, adminMode);
+    const card = RecipeCard(
+      recipe,
+      async (id) => {
+        recipes = await deleteRecipe(id);
+        renderGrid();
+      },
+      adminMode,
+      (r) => editModal.open(r),
+    );
     grid.appendChild(card);
   });
 }
 
-function handleDelete(id) {
-  recipes = deleteRecipe(recipes, id);
-  renderGrid();
+// ── Loading state ─────────────────────────────────────────────────────────────
+
+function showLoading() {
+  grid.innerHTML = '<p class="recipe-grid__loading" aria-live="polite">Loading recipes…</p>';
 }
 
-// ── Initial render ────────────────────────────────────────────────────────────
+// ── Auth state management ─────────────────────────────────────────────────────
 
-renderGrid();
-renderAdmin();
+function setAuth(session) {
+  isAuthenticated = Boolean(session);
+  if (isAuthenticated) {
+    adminMode = true;
+  } else {
+    adminMode = false;
+  }
+  adminToggle.setAttribute('aria-pressed', String(adminMode));
+  adminToggle.classList.toggle('app-header__admin-btn--active', adminMode);
+  renderGrid();
+  renderAdmin();
+}
+
+// ── Initialise ────────────────────────────────────────────────────────────────
+
+async function init() {
+  showLoading();
+
+  let initialSession = null;
+  if (isSupabaseConfigured) {
+    initialSession = await getSession();
+
+    // Subscribe to future auth changes (login / logout)
+    onAuthStateChange((_event, session) => {
+      setAuth(session);
+    });
+  }
+
+  recipes = await loadRecipes();
+
+  if (isSupabaseConfigured) {
+    // setAuth updates isAuthenticated, adminMode, toggle button, grid, and panel
+    setAuth(initialSession);
+  } else {
+    renderGrid();
+    renderAdmin();
+  }
+}
+
+init();
 
 // ── Service worker ────────────────────────────────────────────────────────────
 
