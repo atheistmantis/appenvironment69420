@@ -1,15 +1,15 @@
 const CACHE = 'phone-app-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/manifest.json'
-  // add icons and other assets you want cached
-];
 
 self.addEventListener('install', evt => {
   evt.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE).then(cache => {
+      const base = self.registration.scope;
+      return cache.addAll([
+        base,
+        base + 'index.html',
+        // add icons and other assets you want cached
+      ]);
+    })
   );
   self.skipWaiting();
 });

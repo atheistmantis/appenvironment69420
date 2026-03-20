@@ -96,3 +96,9 @@ function handleDelete(id) {
 
 renderGrid();
 renderAdmin();
+
+// ── Service worker ────────────────────────────────────────────────────────────
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register(import.meta.env.BASE_URL + 'service-worker.js');
+}
