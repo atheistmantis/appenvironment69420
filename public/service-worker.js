@@ -20,6 +20,6 @@ self.addEventListener('activate', evt => {
 
 self.addEventListener('fetch', evt => {
   evt.respondWith(
-    caches.match(evt.request).then(r => r || fetch(evt.request))
+    caches.match(evt.request).then(r => r || fetch(evt.request).catch(() => new Response('', { status: 503 })))
   );
 });
